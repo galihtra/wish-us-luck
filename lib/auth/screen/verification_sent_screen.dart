@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class EmailVerifiedScreen extends StatelessWidget {
+class VerificationSentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,7 +12,7 @@ class EmailVerifiedScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Email Verified!',
+                'Verification Email Sent',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -28,24 +28,12 @@ class EmailVerifiedScreen extends StatelessWidget {
                     .purple[100], // Match the color as per your image style
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Add your onPressed action here
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple, // Button color
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                ),
-                child: const Text(
-                  'Start your Journey NOW!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
+              const Text(
+                'Please check your email.\nOr check your Junk/Spam...',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
                 ),
               ),
             ],

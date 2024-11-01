@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'email_verify_screen.dart';
+
 class RegisterScreen extends StatefulWidget  {
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -262,7 +264,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
             // Submit Button
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EmailVerifiedScreen()),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF8A56AC),
                 padding: const EdgeInsets.symmetric(vertical: 16),
