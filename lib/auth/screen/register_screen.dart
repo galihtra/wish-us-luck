@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'email_verify_screen.dart';
+import 'package:wish_us_luck/auth/screen/verification_sent_screen.dart';
 
 class RegisterScreen extends StatefulWidget  {
   @override
@@ -116,7 +115,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   .toList(),
               onChanged: (value) {},
               decoration: InputDecoration(
-                labelText: 'Continent',
                 labelStyle:
                     TextStyle(fontFamily: 'Poppins', color: Colors.black),
                 filled: true,
@@ -267,7 +265,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               onPressed: () {
                 Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EmailVerifiedScreen()),
+                MaterialPageRoute(builder: (context) => VerificationEmailSentScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'email_verified_screen.dart';
+import '../../home/screen/home_screen.dart';
 
-class VerificationEmailSentScreen extends StatelessWidget {
+class EmailVerifiedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,21 +19,16 @@ class VerificationEmailSentScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              'Verification Email Sent',
+              'Email Verified!',
               style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            Text(
-              'Please check your email.\nOr check your Junk/Spam...',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-            ),
-            SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
+                Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => EmailVerifiedScreen()),
+                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                      (Route<dynamic> route) => false,
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -45,7 +40,7 @@ class VerificationEmailSentScreen extends StatelessWidget {
                 elevation: 2,
               ),
               child: Text(
-                'I Verified My Email!',
+                'Start your Journey NOW!',
                 style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'Poppins',

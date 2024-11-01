@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../onboarding/screen/onboarding_screen.dart';
+
 class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -10,7 +12,9 @@ class SettingsScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context); // Navigate back
+          },
         ),
         title: const Text(
           "Settings",
@@ -23,14 +27,14 @@ class SettingsScreen extends StatelessWidget {
           Container(
             color: const Color(0xFFFFFFFF),
             padding: const EdgeInsets.symmetric(vertical: 20),
-            child: const Column(
+            child: Column( // Fixed from const Column to just Column
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 40,
                   backgroundColor: Colors.grey,
                 ),
-                SizedBox(height: 10),
-                Text(
+                const SizedBox(height: 10),
+                const Text(
                   "Melissa L.",
                   style: TextStyle(
                     fontSize: 20,
@@ -39,7 +43,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                  children: const [
                     Text(
                       "🇮🇩",
                       style: TextStyle(fontSize: 16),
@@ -83,7 +87,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
                 onTap: () {
-                  // Logic logout
+                  _showLogoutDialog(context);
                 },
               ),
             ),
@@ -123,6 +127,86 @@ class SettingsScreen extends StatelessWidget {
           // Logic move to another page
         },
       ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            decoration: BoxDecoration(
+              color: Color(0xFF8E44AD), // Purple background color
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Are you sure?",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        // Navigate to OnboardingScreen and clear previous screens
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => OnboardingScreen()),
+                              (Route<dynamic> route) => false,
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: const Color(0xFFD3D3FF), // Light purple button
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "Yes",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.red, // Red button
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "No",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

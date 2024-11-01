@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../settings/screen/settings_screen.dart';
+import 'notifications_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -27,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
       userName = prefs.getString('userName') ?? 'User';
     });
   }
+
   void _setGreetingMessage() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
@@ -48,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Function to determine button color based on selection
   Color _getButtonColor(String topic) {
-    return selectedTopic == topic ? Colors.purple : Colors.grey[300]!;
+    return selectedTopic == topic ? Color(0xFF8366A9) : Colors.grey[300]!;
   }
 
   // Function to determine text color based on selection
@@ -60,21 +64,32 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFE8F0FE),
+        backgroundColor: Color(0xFFD3D3FF), // Match the background color
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.menu, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsScreen()),
+            );
+          },
         ),
         actions: [
           IconButton(
             icon: Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationsScreen()),
+              );
+            },
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Container(
+          color: Color(0xFFD3D3FF), // Background color
           padding: EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,100 +111,113 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              SizedBox(height: 20),
-              // Filter Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: ['All Posts', 'Most Recent', 'Recommended', 'Popular']
-                    .map((filter) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedFilter = filter;
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: selectedFilter == filter ? Colors.purple : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      filter,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: selectedFilter == filter ? Colors.white : Colors.black,
-                      ),
-                    ),
-                  ),
-                ))
-                    .toList(),
-              ),
-              SizedBox(height: 20),
-              // Search by Topic
-              Text(
-                'Search by Topic',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              // Background Rectangle for Buttons and Search
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
                 ),
-              ),
-              SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _buildTopicButton(Icons.local_hospital, 'Cancer Type'),
-                  _buildTopicButton(Icons.timeline, 'Cancer Stage'),
-                  _buildTopicButton(Icons.psychology, 'Mental Wellbeing'),
-                  _buildTopicButton(Icons.medication, 'Treatment'),
-                ],
-              ),
-              SizedBox(height: 20),
-              // Posts List (shown only if there are posts)
-              hasPosts
-                  ? ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: 5, // Replace with dynamic post count
-                itemBuilder: (context, index) {
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      title: Text(
-                        'Post Title $index',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: Column(
+                  children: [
+                    // Filter Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: ['All Posts', 'Most Recent', 'Recommended', 'Popular']
+                          .map((filter) => GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedFilter = filter;
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: selectedFilter == filter
+                                ? Color(0xFFD3D3FF).withOpacity(0.5)
+                                : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            filter,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: selectedFilter == filter ? Color(0xFF8366A9) : Colors.black,
+                            ),
+                          ),
                         ),
-                      ),
-                      subtitle: Text(
-                        'Post content goes here...',
-                        style: GoogleFonts.poppins(fontSize: 14),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.thumb_up_alt_outlined),
-                            onPressed: () {}, // Like functionality
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.comment_outlined),
-                            onPressed: () {}, // Navigate to comment section
-                          ),
-                        ],
+                      ))
+                          .toList(),
+                    ),
+                    SizedBox(height: 20),
+                    // Search by Topic
+                    Text(
+                      'Search by Topic',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  );
-                },
-              )
-                  : Center(
-                child: Text(
-                  'No posts to display.',
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+                    SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildTopicButton(Icons.local_hospital, 'Cancer Type'),
+                        _buildTopicButton(Icons.timeline, 'Cancer Stage'),
+                        _buildTopicButton(Icons.psychology, 'Mental Wellbeing'),
+                        _buildTopicButton(Icons.medication, 'Treatment'),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    // Posts List (shown only if there are posts)
+                    hasPosts
+                        ? ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: 5, // Replace with dynamic post count
+                      itemBuilder: (context, index) {
+                        return Card(
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            title: Text(
+                              'Post Title $index',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Post content goes here...',
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.thumb_up_alt_outlined),
+                                  onPressed: () {}, // Like functionality
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.comment_outlined),
+                                  onPressed: () {}, // Navigate to comment section
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                        : Center(
+                      child: Text(
+                        'No posts to display.',
+                        style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                  ],
                 ),
               ),
-              SizedBox(height: 20),
               // Input Box for New Post
               TextField(
                 readOnly: true,
@@ -225,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return ElevatedButton.icon(
       onPressed: () {
         setState(() {
-          // Toggle selected topic or navigate to filtered posts
+          selectedTopic = label; // Set the selected topic
         });
       },
       icon: Icon(icon, color: Colors.purple),
@@ -234,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
         style: GoogleFonts.poppins(fontSize: 14, color: Colors.purple),
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[200],
+        backgroundColor: _getButtonColor(label),
         foregroundColor: Colors.purple,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
