@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:wish_us_luck/auth/screen/register_screen.dart';
 import 'package:wish_us_luck/home/screen/home_screen.dart';
 
 class LoginScreen extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Future<void> loginUser(String email, String password) async {
+    // Here you would add your login logic, such as calling an API
+    // If successful, navigate to HomeScreen, otherwise handle the error
+    if (email == "test@example.com" && password == "password") {
+      // Simulate a successful login
+      return;
+    } else {
+      throw Exception("Invalid email or password");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,6 +46,7 @@ class LoginScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             TextField(
+              controller: emailController,
               decoration: InputDecoration(
                 hintText: 'Email',
                 hintStyle: TextStyle(fontFamily: 'Poppins', color: Colors.grey),
@@ -56,6 +72,8 @@ class LoginScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             TextField(
+              controller: passwordController,
+              obscureText: true,
               decoration: InputDecoration(
                 hintText: 'Password',
                 hintStyle: TextStyle(fontFamily: 'Poppins', color: Colors.grey),
@@ -66,12 +84,13 @@ class LoginScreen extends StatelessWidget {
                   borderSide: BorderSide.none,
                 ),
               ),
-              obscureText: true,
             ),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Handle forgot password
+                },
                 child: Text(
                   'Forgot Password?',
                   style: TextStyle(color: Color(0xFF8A56AC)),
@@ -80,18 +99,39 @@ class LoginScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
 
-            // "Join the Community" button
+            // Login Button
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => HomeScreen()),
-                );
+              onPressed: () async {
+                try {
+                  await loginUser(emailController.text, passwordController.text);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => HomeScreen()),
+                  );
+                } catch (e) {
+                  // Show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Login Failed'),
+                        content: Text(e.toString()),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF8366A9),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 64),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 64),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -112,12 +152,11 @@ class LoginScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => LoginScreen()));
+                    context, MaterialPageRoute(builder: (_) => RegisterScreen()));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 30),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15)),
               ),

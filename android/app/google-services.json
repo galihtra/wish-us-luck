@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "20826632019",
+    "project_id": "healthkathon-8f7b5",
+    "storage_bucket": "healthkathon-8f7b5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:20826632019:android:6a0be88b1d2047562a7ba6",
+        "android_client_info": {
+          "package_name": "com.example.wish_us_luck"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhH4cnkWxeH7BIQDKzts0Zak0J8mFRd7U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

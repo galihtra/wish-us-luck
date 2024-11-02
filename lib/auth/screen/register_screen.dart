@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wish_us_luck/auth/screen/verification_sent_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterScreen extends StatefulWidget  {
   @override
@@ -9,6 +10,40 @@ class RegisterScreen extends StatefulWidget  {
 class _RegisterScreenState extends State<RegisterScreen> {
   bool _termsAccepted = false;
   bool _dataConsent = false;
+
+  final _fullNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  Future<void> _register() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    if (password != _confirmPasswordController.text.trim()) {
+      // Show an error message
+      return;
+    }
+
+    try {
+      // Check if email already exists
+      final existingUser = (await FirebaseAuth.instance.fetchSignInMethodsForEmail(email)).isNotEmpty;
+      if (existingUser) {
+        // Show an error message
+        return;
+      }
+
+      // Create a new user
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => VerificationEmailSentScreen()),
+      );
+    } catch (e) {
+      // Handle registration error (e.g., show a dialog with the error message)
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,10 +76,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 fontSize: 16,
               ),
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             TextField(
+              controller: _fullNameController,
               decoration: InputDecoration(
                 hintText: 'Full name',
                 hintStyle: TextStyle(fontFamily: 'Poppins', color: Colors.grey),
@@ -68,55 +102,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 fontSize: 16,
               ),
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             TextField(
+              controller: _emailController,
               decoration: InputDecoration(
                 hintText: 'Email',
                 hintStyle: TextStyle(fontFamily: 'Poppins', color: Colors.grey),
-                filled: true,
-                fillColor: Color(0xFFF0F0F0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Continent Dropdown
-            const Text(
-              "Continent",
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                color: Colors.grey,
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            DropdownButtonFormField(
-              items: [
-                'Africa',
-                'Asia',
-                'Europe',
-                'North America',
-                'Oceania',
-                'South America'
-              ]
-                  .map((continent) => DropdownMenuItem(
-                        child: Text(continent,
-                            style: TextStyle(fontFamily: 'Poppins')),
-                        value: continent,
-                      ))
-                  .toList(),
-              onChanged: (value) {},
-              decoration: InputDecoration(
-                labelStyle:
-                    TextStyle(fontFamily: 'Poppins', color: Colors.black),
                 filled: true,
                 fillColor: Color(0xFFF0F0F0),
                 border: OutlineInputBorder(
@@ -137,10 +128,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 fontSize: 16,
               ),
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             TextField(
+              controller: _passwordController,
               decoration: InputDecoration(
                 hintText: 'Password',
                 hintStyle: TextStyle(fontFamily: 'Poppins', color: Colors.grey),
@@ -165,10 +155,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 fontSize: 16,
               ),
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             TextField(
+              controller: _confirmPasswordController,
               decoration: InputDecoration(
                 hintText: 'Confirm Password',
                 hintStyle: TextStyle(fontFamily: 'Poppins', color: Colors.grey),
@@ -183,90 +172,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Checkbox for Terms and Conditions
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Checkbox(
-                  value: _termsAccepted,
-                  onChanged: (value) {
-                    setState(() {
-                      _termsAccepted = value!;
-                    });
-                  },
-                  activeColor: const Color(0xFF8A56AC),
-                ),
-                Expanded(
-                  child: RichText(
-                    text: const TextSpan(
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        color: Colors.black,
-                        fontSize: 14,
-                      ),
-                      children: [
-                        TextSpan(text: 'I agree to the '),
-                        TextSpan(
-                          text: 'Terms & Conditions',
-                          style: TextStyle(
-                            color: Color(0xFF8A56AC),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Checkbox for Consent
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Checkbox(
-                  value: _dataConsent,
-                  onChanged: (value) {
-                    setState(() {
-                      _dataConsent = value!;
-                    });
-                  },
-                  activeColor: const Color(0xFF8A56AC),
-                ),
-                Expanded(
-                  child: RichText(
-                    text: const TextSpan(
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        color: Colors.black,
-                        fontSize: 14,
-                      ),
-                      children: [
-                        TextSpan(
-                            text:
-                                'I consent to my data being used for research purposes. '),
-                        TextSpan(
-                          text: 'Learn More',
-                          style: TextStyle(
-                            color: Color(0xFF8A56AC),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-
             // Submit Button
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => VerificationEmailSentScreen()),
-                );
+                _register();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF8A56AC),

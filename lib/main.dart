@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:wish_us_luck/splash/screen/splash_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  // Ensure that widget binding is initialized before Firebase is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
+
   runApp(MyApp());
 }
 
@@ -20,6 +27,7 @@ class MyApp extends StatelessWidget {
         ),
         // Define the text theme with font family and styles
         textTheme: TextTheme(
+          // Add your text styles here if needed
         ),
       ),
       home: SplashScreen(), // Set your initial screen
