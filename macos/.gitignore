@@ -5,3 +5,6 @@
 # Xcode-related
 **/dgph
 **/xcuserdata/
+
+google-services.json
+GoogleService-Info.plist

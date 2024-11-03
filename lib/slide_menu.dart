@@ -18,57 +18,52 @@ class SlideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        // Profile Header
-        UserAccountsDrawerHeader(
-          decoration: BoxDecoration(color: Colors.purple.shade100),
-          accountName: Text("Melissa L.", style: TextStyle(color: Colors.black)),
-          accountEmail: Text("Indonesia"),
-          currentAccountPicture: CircleAvatar(
-            backgroundColor: Colors.grey,
-            child: Icon(Icons.person, color: Colors.white),
-          ),
-        ),
-
-        // Menu Items
-        ListTile(
-          leading: Icon(Icons.group),
-          title: Text("Community"),
-          onTap: onCommunityTap, // Call the community tap callback
-        ),
-        ListTile(
-          leading: Icon(Icons.volunteer_activism),
-          title: Text("Donation"),
-          onTap: onDonationTap, // Call the donation tap callback
-        ),
-        ListTile(
-          leading: Icon(Icons.post_add),
-          title: Text("Your Posts"),
-          onTap: onYourPostsTap, // Call the your posts tap callback
-        ),
-        ListTile(
-          leading: Icon(Icons.settings),
-          title: Text("Settings"),
-          onTap: onSettingsTap, // Call the settings tap callback
-        ),
-
-        Spacer(),
-
-        // Logout Button
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: OutlinedButton.icon(
-            onPressed: onLogoutTap, // Call the logout tap callback
-            icon: Icon(Icons.logout, color: Colors.black),
-            label: Text("Log Out", style: TextStyle(color: Colors.black)),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Colors.black),
+    return Drawer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Profile Header
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(color: Color(0xFFD3D3FF)), // Match with NotificationsScreen
+            accountName: Text("Melissa L.", style: TextStyle(color: Colors.black)),
+            accountEmail: Text("Indonesia", style: TextStyle(color: Colors.black54)),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Colors.grey,
+              child: Icon(Icons.person, color: Colors.white),
             ),
           ),
-        ),
-      ],
+
+          // Menu Items
+          _buildMenuItem(Icons.group, "Community", onCommunityTap),
+          _buildMenuItem(Icons.volunteer_activism, "Donation", onDonationTap),
+          _buildMenuItem(Icons.post_add, "Your Posts", onYourPostsTap),
+          _buildMenuItem(Icons.settings, "Settings", onSettingsTap),
+
+          // Spacer
+          Spacer(),
+
+          // Logout Button
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: OutlinedButton.icon(
+              onPressed: onLogoutTap, // Call the logout tap callback
+              icon: Icon(Icons.logout, color: Colors.black),
+              label: Text("Log Out", style: TextStyle(color: Colors.black)),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Colors.black),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Color(0xFF8366A9)), // Match the theme color
+      title: Text(title, style: TextStyle(color: Colors.black)),
+      onTap: onTap, // Call the respective callback
     );
   }
 }

@@ -1,12 +1,8 @@
-import 'dart:io';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'notifications_screen.dart';
-import '../../settings/screen/settings_screen.dart';
 
 class CreatePostScreen extends StatefulWidget {
   @override
@@ -14,39 +10,22 @@ class CreatePostScreen extends StatefulWidget {
 }
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
-  XFile? _image; // Variable to hold the selected image
+  XFile? _image;
   final ImagePicker _picker = ImagePicker();
-  String selectedTopic = ''; // Store selected topic
+  String selectedTopic = '';
   String userName = '';
   String greetingMessage = '';
-  final List<String> topics = [
-    'Cancer Type',
-    'Cancer Stage',
-    'Mental Wellbeing',
-    'Treatment',
-  ];
+  String specificTopic = '';
+  final List<String> topics = ['Cancer Type', 'Cancer Stage', 'Mental Wellbeing', 'Treatment'];
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
-  final Map<String, TextEditingController> topicControllers = {};
+  final TextEditingController specificTopicController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadUserName();
     _setGreetingMessage();
-    for (var topic in topics) {
-      topicControllers[topic] = TextEditingController();
-    }
-  }
-
-  @override
-  void dispose() {
-    for (var controller in topicControllers.values) {
-      controller.dispose();
-    }
-    titleController.dispose();
-    contentController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadUserName() async {
@@ -67,159 +46,159 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      _image = pickedImage;
+  Future<void> _postContent() async {
+    await FirebaseFirestore.instance.collection('posts').add({
+      'title': titleController.text,
+      'content': contentController.text,
+      'topic': selectedTopic,
+      'specificTopic': specificTopic,
+      'image': _image != null ? _image!.path : null,
+      'userName': userName,
+      'timestamp': FieldValue.serverTimestamp(),
     });
+
+    titleController.clear();
+    contentController.clear();
+    specificTopicController.clear();
+    setState(() {
+      selectedTopic = '';
+      specificTopic = '';
+      _image = null;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Post created successfully!')),
+    );
   }
 
-  Color _getButtonColor(String topic) {
-    return selectedTopic == topic ? Color(0xFF8366A9) : Colors.grey[300]!;
-  }
-
-  Color _getTextColor(String topic) {
-    return selectedTopic == topic ? Colors.white : Colors.black;
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = pickedFile;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE4DAFF), // Keep the purple background
       appBar: AppBar(
-        backgroundColor: Color(0xFFD3D3FF), // Match the background color
+        backgroundColor: Color(0xFFE4DAFF),
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.menu, color: Colors.black),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SettingsScreen()),
-            );
-          },
-        ),
         actions: [
           IconButton(
             icon: Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NotificationsScreen()),
-              );
-            },
+            onPressed: () {},
           ),
         ],
       ),
       body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
         child: Container(
-          color: Color(0xFFD3D3FF), // Background color
-          padding: EdgeInsets.all(20),
+          color: Colors.white, // Set the container color to white
+          padding: EdgeInsets.all(16), // Add padding to the white container
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Text
+              Text(
+                "$greetingMessage, $userName",
+                style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Text("Connect with like-minded individuals!", style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600])),
+              SizedBox(height: 20),
               Text(
                 'Share Your Thoughts',
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
-              // Title Input
               TextField(
                 controller: titleController,
                 decoration: InputDecoration(
-                  hintText: "Title",
-                  hintStyle: GoogleFonts.poppins(color: Colors.grey),
+                  hintText: "Write a title...",
+                  filled: true,
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
                   ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
                 ),
               ),
               SizedBox(height: 20),
-              // Content Input (including file attachment)
               TextField(
                 controller: contentController,
                 maxLines: 5,
                 decoration: InputDecoration(
-                  hintText: "Write your content here...",
-                  hintStyle: GoogleFonts.poppins(color: Colors.grey),
+                  hintText: "Share your thoughts...",
+                  filled: true,
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
                   ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
                 ),
               ),
               SizedBox(height: 20),
-              _image != null
-                  ? Image.file(File(_image!.path), height: 200)
-                  : SizedBox(),
-              ElevatedButton.icon(
-                onPressed: _pickImage,
-                icon: Icon(Icons.attach_file),
-                label: Text("Attach File"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF8366A9),
-                ),
-              ),
-              SizedBox(height: 20),
-              // Topic Selection (now below content)
               Text(
-                'Add Topics (Optional)',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                'Topic',
+                style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 8),
               Wrap(
                 spacing: 8,
-                runSpacing: 8,
                 children: topics.map((topic) {
-                  return GestureDetector(
-                    onTap: () {
+                  return ChoiceChip(
+                    label: Text(topic, style: TextStyle(color: selectedTopic == topic ? Colors.white : Colors.black)),
+                    selected: selectedTopic == topic,
+                    onSelected: (isSelected) {
                       setState(() {
-                        selectedTopic = topic;
+                        selectedTopic = isSelected ? topic : '';
+                        specificTopic = ''; // Clear the specific topic when a new topic is selected
+                        specificTopicController.clear(); // Clear the text field for specific topic
                       });
                     },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: _getButtonColor(topic),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: selectedTopic == topic
-                          ? TextField(
-                        controller: topicControllers[topic],
-                        decoration: InputDecoration(
-                          hintText: 'Enter details for $topic',
-                          border: InputBorder.none,
-                          hintStyle: GoogleFonts.poppins(color: Colors.white),
-                        ),
-                        style: GoogleFonts.poppins(color: Colors.white),
-                      )
-                          : Text(
-                        topic,
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: _getTextColor(topic),
-                        ),
-                      ),
-                    ),
+                    selectedColor: Color(0xFF8366A9),
+                    backgroundColor: Colors.grey[300],
                   );
                 }).toList(),
               ),
+              SizedBox(height: 8),
+              if (selectedTopic.isNotEmpty)
+                TextField(
+                  controller: specificTopicController,
+                  decoration: InputDecoration(
+                    hintText: "Enter specific $selectedTopic...",
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      specificTopic = value; // Update specific topic input
+                    });
+                  },
+                ),
               SizedBox(height: 20),
-              // Post Button
-              ElevatedButton(
-                onPressed: () {
-                  // Code to post the content along with the title, selected topic, and image
-                },
-                child: Text("Post"),
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF8366A9)),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: Icon(Icons.attach_file),
+                  onPressed: _pickImage,
+                  color: Color(0xFF8366A9),
+                ),
+              ),
+              SizedBox(height: 20),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: FloatingActionButton(
+                  onPressed: _postContent,
+                  backgroundColor: Color(0xFF8366A9),
+                  child: Icon(Icons.send),
+                ),
               ),
             ],
           ),

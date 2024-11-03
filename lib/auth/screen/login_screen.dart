@@ -1,20 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:wish_us_luck/auth/screen/register_screen.dart';
+import 'package:wish_us_luck/auth/screen/verification_sent_screen.dart';
 import 'package:wish_us_luck/home/screen/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   Future<void> loginUser(String email, String password) async {
-    // Here you would add your login logic, such as calling an API
-    // If successful, navigate to HomeScreen, otherwise handle the error
-    if (email == "test@example.com" && password == "password") {
-      // Simulate a successful login
-      return;
-    } else {
-      throw Exception("Invalid email or password");
+    try {
+      // Attempt to sign in with Firebase
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Successfully signed in, you can perform any post-login actions here
+      print("User logged in: ${userCredential.user?.email}");
+    } on FirebaseAuthException catch (e) {
+      // Handle Firebase authentication exceptions
+      if (e.code == 'user-not-found') {
+        throw Exception('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        throw Exception('Wrong password provided for that user.');
+      } else {
+        throw Exception('Error: ${e.message}');
+      }
+    } catch (e) {
+      // Handle other exceptions
+      throw Exception('Error: $e');
     }
+  }
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Logging you in..."),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _hideLoadingDialog(BuildContext context) {
+    Navigator.of(context).pop(); // Dismiss the dialog
   }
 
   @override
@@ -89,7 +128,11 @@ class LoginScreen extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: TextButton(
                 onPressed: () {
-                  // Handle forgot password
+                  // Navigate to the Change Password screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => VerificationEmailSentScreen()),
+                  );
                 },
                 child: Text(
                   'Forgot Password?',
@@ -102,13 +145,17 @@ class LoginScreen extends StatelessWidget {
             // Login Button
             ElevatedButton(
               onPressed: () async {
+                _showLoadingDialog(context); // Show the loading dialog
                 try {
+                  // Call loginUser with the entered email and password
                   await loginUser(emailController.text, passwordController.text);
+                  _hideLoadingDialog(context); // Hide the loading dialog
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => HomeScreen()),
                   );
                 } catch (e) {
+                  _hideLoadingDialog(context); // Hide the loading dialog on error
                   // Show error dialog
                   showDialog(
                     context: context,

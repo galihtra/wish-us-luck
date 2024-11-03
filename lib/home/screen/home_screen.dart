@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wish_us_luck/donations/donations_screen.dart';
+import 'package:wish_us_luck/auth/your_posts_screen.dart';
+import '../../donations/donations_screen.dart';
 import '../../auth/screen/login_screen.dart';
 import '../../settings/screen/settings_screen.dart';
 import '../../slide_menu.dart';
 import 'create_post_screen.dart';
 import 'notifications_screen.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -15,8 +17,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String userName = '';
+  String displayName = ''; // Default user name
   String greetingMessage = '';
+  Timer? _timer;
   String selectedFilter = 'All Posts';
   String selectedTopic = '';
   bool hasPosts = false; // Simulating if there are posts to show
@@ -26,12 +29,22 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadUserName();
     _setGreetingMessage();
+
+    _timer = Timer.periodic(Duration(hours: 1), (timer) {
+      _setGreetingMessage();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
   }
 
   Future<void> _loadUserName() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      userName = prefs.getString('userName') ?? 'User';
+      displayName = prefs.getString('fullName') ?? 'User'; // Updated variable name
     });
   }
 
@@ -59,22 +72,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return selectedTopic == topic ? Color(0xFF8366A9) : Colors.grey[300]!;
   }
 
-  // Function to determine text color based on selection
-  Color _getTextColor(String topic) {
-    return selectedTopic == topic ? Colors.white : Colors.black;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SliderDrawer(
         appBar: SliderAppBar(
           appBarColor: Color(0xFFD3D3FF),
-          title: Text(
-            "Hello, $userName",
-            style: GoogleFonts.poppins(color: Colors.black, fontSize: 18),
-          ),
           drawerIconColor: Colors.black,
+          title: Text(''),
           trailing: IconButton(
             icon: Icon(Icons.notifications_none, color: Colors.black),
             onPressed: () {
@@ -86,38 +91,35 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         slider: SlideMenu(
-          onCommunityTap: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomeScreen()), // Navigate to HomeScreen
-            );
-          },
-          onDonationTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => DonationsScreen()), // Navigate to DonationScreen
-            );
-          },
-          onYourPostsTap: () {
-            // Navigate to Your Posts Screen (assuming you have a screen for this)
-
-          },
-          onSettingsTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SettingsScreen()), // Navigate to SettingsScreen
-            );
-          },
-          onLogoutTap: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => LoginScreen()), // Navigate to LoginScreen
-            );
-          },
+          onCommunityTap: () => _navigateToHome(),
+          onDonationTap: () => _navigateToDonations(),
+          onYourPostsTap: () => _navigateToYourPosts(),
+          onSettingsTap: () => _navigateToSettings(),
+          onLogoutTap: () => _navigateToLogin(),
         ),
         child: _buildMainContent(),
       ),
     );
+  }
+
+  void _navigateToHome() {
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+  }
+
+  void _navigateToDonations() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => DonationsScreen()));
+  }
+
+  void _navigateToSettings() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()));
+  }
+
+  void _navigateToYourPosts() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => YourPostsScreen()));
+  }
+
+  void _navigateToLogin() {
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 
   Widget _buildMainContent() {
@@ -130,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // Greeting Text
             Text(
-              '$greetingMessage,\n$userName',
+              '$greetingMessage,\n$displayName',
               style: GoogleFonts.poppins(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -208,35 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: 5, // Replace with dynamic post count
                     itemBuilder: (context, index) {
-                      return Card(
-                        margin: EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          title: Text(
-                            'Post Title $index',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'Post content goes here...',
-                            style: GoogleFonts.poppins(fontSize: 14),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.thumb_up_alt_outlined),
-                                onPressed: () {}, // Like functionality
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.comment_outlined),
-                                onPressed: () {}, // Navigate to comment section
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                      return _buildPostCard(index);
                     },
                   )
                       : Center(
@@ -253,7 +227,6 @@ class _HomeScreenState extends State<HomeScreen> {
             TextField(
               readOnly: true,
               onTap: () {
-                // Navigate to create post screen
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => CreatePostScreen()),
@@ -278,6 +251,39 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  Widget _buildPostCard(int index) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        title: Text(
+          'Post Title $index',
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Text(
+          'Post content goes here...',
+          style: GoogleFonts.poppins(fontSize: 14),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.thumb_up_alt_outlined),
+              onPressed: () {}, // Like functionality
+            ),
+            IconButton(
+              icon: Icon(Icons.comment_outlined),
+              onPressed: () {}, // Navigate to comment section
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTopicButton(IconData icon, String label) {
     return ElevatedButton.icon(
       onPressed: () {
