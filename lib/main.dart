@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:wish_us_luck/auth/your_posts_screen.dart';
+import 'package:wish_us_luck/home/screen/home_screen.dart';
+import 'package:wish_us_luck/settings/screen/settings_screen.dart';
 import 'package:wish_us_luck/splash/screen/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -40,10 +43,16 @@ class MyApp extends StatelessWidget {
         ),
         // Define the text theme with font family and styles
         textTheme: TextTheme(
-          titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
+          titleLarge: TextStyle(
+              fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
           bodyLarge: TextStyle(fontSize: 18, color: Colors.grey[800]),
         ),
       ),
+      routes: {
+        '/community': (context) => HomeScreen(),
+        '/your_posts': (context) => YourPostsScreen(),
+        '/settings': (context) => SettingsScreen(),
+      },
       home: SplashScreen(), // Set your initial screen
     );
   }
