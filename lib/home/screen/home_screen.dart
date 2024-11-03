@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wish_us_luck/auth/your_posts_screen.dart';
+import '../../Post.dart';
 import '../../donations/donations_screen.dart';
 import '../../auth/screen/login_screen.dart';
 import '../../settings/screen/settings_screen.dart';
@@ -17,34 +19,46 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String displayName = ''; // Default user name
+  String displayName = '';
   String greetingMessage = '';
   Timer? _timer;
   String selectedFilter = 'All Posts';
   String selectedTopic = '';
-  bool hasPosts = false; // Simulating if there are posts to show
+  List<Post> posts = []; // List of Post objects
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
     _loadUserName();
     _setGreetingMessage();
+    refreshPosts();
 
     _timer = Timer.periodic(Duration(hours: 1), (timer) {
       _setGreetingMessage();
     });
   }
 
+  Future<void> refreshPosts() async {
+    final postSnapshot = await _firestore.collection('posts').orderBy('timestamp', descending: true).get();
+
+    setState(() {
+      posts = postSnapshot.docs.map((doc) {
+        return Post.fromDocument(doc); // Using the fromDocument method of the Post class
+      }).toList();
+    });
+  }
+
   @override
   void dispose() {
-    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    _timer?.cancel();
     super.dispose();
   }
 
   Future<void> _loadUserName() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      displayName = prefs.getString('fullName') ?? 'User'; // Updated variable name
+      displayName = prefs.getString('fullName') ?? 'User';
     });
   }
 
@@ -58,14 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
       greetingMessage = 'Good Evening';
     }
   }
-
-  // List of topics
-  final List<String> topics = [
-    'Cancer Type',
-    'Cancer Stage',
-    'Mental Wellbeing',
-    'Treatment',
-  ];
 
   // Function to determine button color based on selection
   Color _getButtonColor(String topic) {
@@ -125,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMainContent() {
     return SingleChildScrollView(
       child: Container(
-        color: Color(0xFFD3D3FF), // Background color
+        color: Color(0xFFD3D3FF),
         padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,29 +201,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   SizedBox(height: 10),
+                  // Topic Buttons
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: topics
+                    children: ['Cancer Type', 'Cancer Stage', 'Mental Wellbeing', 'Treatment']
                         .map((topic) => _buildTopicButton(Icons.local_hospital, topic))
                         .toList(),
                   ),
                   SizedBox(height: 20),
-                  // Posts List (shown only if there are posts)
-                  hasPosts
-                      ? ListView.builder(
+                  // Posts List
+                  ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: 5, // Replace with dynamic post count
+                    itemCount: posts.length,
                     itemBuilder: (context, index) {
-                      return _buildPostCard(index);
+                      return _buildPostCard(posts[index]); // Use the Post object directly
                     },
-                  )
-                      : Center(
-                    child: Text(
-                      'No posts to display.',
-                      style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
-                    ),
                   ),
                   SizedBox(height: 20),
                 ],
@@ -229,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CreatePostScreen()),
+                  MaterialPageRoute(builder: (context) => CreatePostScreen(onPostCreated: refreshPosts)),
                 );
               },
               decoration: InputDecoration(
@@ -252,19 +252,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPostCard(int index) {
+  Widget _buildPostCard(Post post) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         title: Text(
-          'Post Title $index',
+          post.title,
           style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
         subtitle: Text(
-          'Post content goes here...',
+          post.content,
           style: GoogleFonts.poppins(fontSize: 14),
         ),
         trailing: Row(
@@ -284,23 +284,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTopicButton(IconData icon, String label) {
-    return ElevatedButton.icon(
-      onPressed: () {
+  Widget _buildTopicButton(IconData icon, String topic) {
+    return GestureDetector(
+      onTap: () {
         setState(() {
-          selectedTopic = label; // Set the selected topic
+          selectedTopic = topic;
         });
       },
-      icon: Icon(icon, color: Colors.black),
-      label: Text(
-        label,
-        style: GoogleFonts.poppins(fontSize: 14, color: Colors.black),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _getButtonColor(label),
-        foregroundColor: Colors.black,
-        shape: RoundedRectangleBorder(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: _getButtonColor(topic),
           borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: Colors.white),
+            SizedBox(width: 4),
+            Text(
+              topic,
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          ],
         ),
       ),
     );
