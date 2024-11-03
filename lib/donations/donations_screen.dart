@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../slide_menu.dart';
 
 class DonationsScreen extends StatelessWidget {
-  final CollectionReference donations = FirebaseFirestore.instance.collection('donations');
+  final CollectionReference donations =
+      FirebaseFirestore.instance.collection('donations');
 
   @override
   Widget build(BuildContext context) {
@@ -12,13 +13,15 @@ class DonationsScreen extends StatelessWidget {
       drawer: Drawer(
         child: SlideMenu(
           onCommunityTap: () {
-            Navigator.pushNamed(context, '/community'); // Navigate to Community screen
+            Navigator.pushNamed(
+                context, '/community'); // Navigate to Community screen
           },
           onDonationTap: () {
             Navigator.of(context).pop(); // Close the drawer, stay on Donations
           },
           onYourPostsTap: () {
-            Navigator.pushNamed(context, '/your_posts'); // Navigate to Your Posts
+            Navigator.pushNamed(
+                context, '/your_posts'); // Navigate to Your Posts
           },
           onSettingsTap: () {
             Navigator.pushNamed(context, '/settings'); // Navigate to Settings
@@ -58,7 +61,8 @@ class DonationsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/create_donation'); // Navigate to a screen to create a new donation
+            Navigator.pushNamed(context,
+                '/create_donation'); // Navigate to a screen to create a new donation
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).primaryColor,
@@ -106,7 +110,8 @@ class _DonationsContentState extends State<DonationsContent> {
           TextField(
             decoration: InputDecoration(
               hintText: "Search for a cause...",
-              prefixIcon: Icon(Icons.search, color: Theme.of(context).primaryColor),
+              prefixIcon:
+                  Icon(Icons.search, color: Theme.of(context).primaryColor),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(24),
                 borderSide: BorderSide.none,
@@ -148,7 +153,10 @@ class _DonationsContentState extends State<DonationsContent> {
 
           Text(
             "Emergency Help for Fundraising",
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 8),
 
@@ -187,7 +195,10 @@ class _DonationsContentState extends State<DonationsContent> {
           // All Campaigns Section
           Text(
             "Latest Fundraising Campaigns",
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 8),
           Expanded(
@@ -242,7 +253,8 @@ class CategoryIcon extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 28,
-            backgroundColor: isSelected ? Color(0xFF8366A9) : color.withOpacity(0.2),
+            backgroundColor:
+                isSelected ? Color(0xFF8366A9) : color.withOpacity(0.2),
             child: Icon(icon, color: color),
           ),
           SizedBox(height: 4),
@@ -262,6 +274,7 @@ class CampaignCard extends StatelessWidget {
   Widget build(BuildContext context) {
     String amountRaised = data['Amount Raised']?.toString() ?? 'Rp0';
     String imageUrl = data['Image URL'] ?? 'https://via.placeholder.com/280';
+    "https://images.unsplash.com/photo-1496449903678-68ddcb189a24?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
     String posterName = data['Poster Name'] ?? 'Unknown';
     String remainingDays = data['Remaining Days']?.toString() ?? 'N/A';
     String title = data['Title'] ?? 'No Title';
@@ -292,6 +305,21 @@ class CampaignCard extends StatelessWidget {
                 height: 120,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                loadingBuilder: (BuildContext context, Widget child,
+                    ImageChunkEvent? loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                (loadingProgress.expectedTotalBytes ?? 1)
+                            : null,
+                      ),
+                    );
+                  }
+                },
                 errorBuilder: (context, error, stackTrace) {
                   return Center(child: Text('Image failed to load'));
                 },
@@ -304,7 +332,10 @@ class CampaignCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 4),
                   Text(
@@ -314,7 +345,9 @@ class CampaignCard extends StatelessWidget {
                   SizedBox(height: 4),
                   Text(
                     amountRaised,
-                    style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 4),
                   Text(
@@ -333,7 +366,8 @@ class CampaignCard extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {
                           // Navigate to donation detail or confirm donation action
-                          Navigator.pushNamed(context, '/donation_detail', arguments: data);
+                          Navigator.pushNamed(context, '/donation_detail',
+                              arguments: data);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -341,7 +375,10 @@ class CampaignCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(24),
                           ),
                         ),
-                        child: Text("Donate", style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+                        child: Text("Donate",
+                            style: TextStyle(
+                                color:
+                                    Theme.of(context).colorScheme.onPrimary)),
                       ),
                     ],
                   ),
