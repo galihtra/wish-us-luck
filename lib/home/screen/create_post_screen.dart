@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreatePostScreen extends StatefulWidget {
-  final Function onPostCreated;
+  final Function(Map<String, dynamic>) onPostCreated;
 
   CreatePostScreen({required this.onPostCreated});
 
@@ -51,15 +51,21 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   Future<void> _postContent() async {
-    await FirebaseFirestore.instance.collection('posts').add({
+    // Create a post map
+    final newPost = {
       'title': titleController.text,
       'content': contentController.text,
       'topic': selectedTopic,
       'specificTopic': specificTopic,
       'image': _image != null ? _image!.path : null,
       'displayName': displayName,
+      'supportCount': 0, // Initialize with zero
+      'commentCount': 0, // Initialize with zero
       'timestamp': FieldValue.serverTimestamp(),
-    });
+    };
+
+    // Add the post to Firestore
+    await FirebaseFirestore.instance.collection('posts').add(newPost);
 
     // Clear the input fields and reset states
     titleController.clear();
@@ -71,16 +77,16 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       _image = null;
     });
 
-    // Notify that a post has been created
-    widget.onPostCreated();
+    // Notify that a post has been created, passing the new post data
+    widget.onPostCreated(newPost);
 
     // Show a success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Post created successfully!')),
     );
 
-    // Optionally, navigate back or do any other action
-    Navigator.pop(context);
+    // Navigate back to YourPostsScreen
+    Navigator.pop(context); // Go back to the previous screen (which should be YourPostsScreen)
   }
 
   Future<void> _pickImage() async {
@@ -102,7 +108,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
           ),
         ],
       ),
@@ -129,7 +137,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
                 ),
                 padding: EdgeInsets.symmetric(vertical: 20),
-                child: Padding(  // Added Padding widget here
+                child: Padding( // Added Padding widget here
                   padding: EdgeInsets.symmetric(horizontal: 16), // Horizontal padding for the column
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

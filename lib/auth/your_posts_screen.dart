@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../Post.dart';
+import '../home/screen/create_post_screen.dart';
 
 class YourPostsScreen extends StatefulWidget {
   @override
@@ -8,133 +11,39 @@ class YourPostsScreen extends StatefulWidget {
 
 class _YourPostsScreenState extends State<YourPostsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<Map<String, dynamic>> userPosts = [];
-  List<String> userComments = [];
-  bool dataLoaded = false;
+  bool isLoading = true;
+  List<Post> posts = []; // Define the list to hold posts
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     loadUserData();
+    refreshPosts();
   }
 
   Future<void> loadUserData() async {
+    // Simulate loading data
     await Future.delayed(Duration(seconds: 1));
     setState(() {
-      userPosts = [
-        {
-          'title': "Hi everyone",
-          'content': "I recently got diagnosed with Stage I cancer... It is quite shocking to me... 😢",
-          'supportCount': 9,
-          'commentCount': 5,
-        },
-        {
-          'title': "Chemo updates",
-          'content': "Just underwent my first chemo 🙌 Thanks for all the support! 💪💪",
-          'supportCount': 10,
-          'commentCount': 12,
-        }
-      ];
-
-      userComments = [
-        "Much love for you! ❤️",
-        "I think you should consult a doctor for safety.",
-      ];
-
-      dataLoaded = true;
+      isLoading = false; // Set loading to false after simulating data load
     });
   }
+
+  Future<void> refreshPosts() async {
+    // Fetch posts from Firestore
+    final postSnapshot = await FirebaseFirestore.instance.collection('posts').orderBy('timestamp', descending: true).get();
+
+    setState(() {
+      posts = postSnapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+    });
+  }
+
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  Widget _buildPostCard({
-    required String title,
-    required String content,
-    required int supportCount,
-    required int commentCount,
-  }) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.white,
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildPostHeader(),
-            SizedBox(height: 12),
-            Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
-            SizedBox(height: 8),
-            Text(content, style: GoogleFonts.poppins(fontSize: 14)),
-            SizedBox(height: 12),
-            _buildPostStats(supportCount, commentCount),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPostHeader() {
-    return Row(
-      children: [
-        CircleAvatar(backgroundColor: Colors.grey[300], radius: 20),
-        SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("You", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-            Text("10 mins ago", style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPostStats(int supportCount, int commentCount) {
-    return Row(
-      children: [
-        Icon(Icons.favorite_border, color: Colors.grey),
-        SizedBox(width: 4),
-        Text('$supportCount people supported', style: GoogleFonts.poppins(fontSize: 12)),
-        SizedBox(width: 16),
-        Icon(Icons.comment, color: Colors.grey),
-        SizedBox(width: 4),
-        Text('$commentCount comments', style: GoogleFonts.poppins(fontSize: 12)),
-      ],
-    );
-  }
-
-  Widget _buildCommentCard({required String commentContent}) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.white,
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(backgroundColor: Colors.grey[300], radius: 20),
-            SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("You commented:", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-                  SizedBox(height: 4),
-                  Text(commentContent, style: GoogleFonts.poppins(fontSize: 14)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -144,12 +53,6 @@ class _YourPostsScreenState extends State<YourPostsScreen> with SingleTickerProv
       appBar: AppBar(
         backgroundColor: Color(0xFFD3D3FF),
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
         title: Text("Your Posts", style: GoogleFonts.poppins(color: Colors.black)),
         bottom: TabBar(
           controller: _tabController,
@@ -161,49 +64,63 @@ class _YourPostsScreenState extends State<YourPostsScreen> with SingleTickerProv
             Tab(text: "Comments"),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreatePostScreen(
+                    onPostCreated: (Map<String, dynamic> newPost) {
+                      // Handle the new post data here
+                      setState(() {
+                        // Update the posts list with the new post
+                        posts.insert(0, Post.fromMap(newPost)); // Insert the new post at the start of the list
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
-      body: dataLoaded
-          ? TabBarView(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : TabBarView(
         controller: _tabController,
         children: [
           _buildPostsTab(),
           _buildCommentsTab(),
         ],
-      )
-          : Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 
   Widget _buildPostsTab() {
-    return userPosts.isNotEmpty
-        ? ListView.builder(
-      padding: EdgeInsets.all(16),
-      itemCount: userPosts.length,
+    if (posts.isEmpty) {
+      // If there are no posts, show a message
+      return Center(
+        child: Text("You haven’t posted anything yet.", style: GoogleFonts.poppins(color: Colors.grey)),
+      );
+    }
+    // If there are posts, display them
+    return ListView.builder(
+      itemCount: posts.length,
       itemBuilder: (context, index) {
-        final post = userPosts[index];
-        return _buildPostCard(
-          title: post['title'],
-          content: post['content'],
-          supportCount: post['supportCount'],
-          commentCount: post['commentCount'],
+        final post = posts[index];
+        return ListTile(
+          title: Text(post.title, style: GoogleFonts.poppins()),
+          subtitle: Text(post.content, style: GoogleFonts.poppins(color: Colors.grey)),
         );
       },
-    )
-        : Center(
-      child: Text("You haven’t posted anything yet.", style: GoogleFonts.poppins(color: Colors.grey)),
     );
   }
 
   Widget _buildCommentsTab() {
-    return userComments.isNotEmpty
-        ? ListView.builder(
-      padding: EdgeInsets.all(16),
-      itemCount: userComments.length,
-      itemBuilder: (context, index) {
-        return _buildCommentCard(commentContent: userComments[index]);
-      },
-    )
-        : Center(
+    // Placeholder for future comments logic
+    return Center(
       child: Text("You haven’t left any comments yet.", style: GoogleFonts.poppins(color: Colors.grey)),
     );
   }
