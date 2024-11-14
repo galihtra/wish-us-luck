@@ -20,11 +20,7 @@ void main() async {
   // Ensure that widget binding is initialized before Firebase is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: firebaseOptions,
-  );
-
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 

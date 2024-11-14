@@ -42,17 +42,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> refreshPosts() async {
     try {
-      final postSnapshot = await _firestore.collection('posts').orderBy('timestamp', descending: true).get();
+      final postSnapshot = await _firestore
+          .collection('posts')
+          .orderBy('timestamp', descending: true)
+          .get();
 
       setState(() {
         posts = postSnapshot.docs.map((doc) {
-          return Post.fromDocument(doc); // Using the fromDocument method of the Post class
+          return Post.fromDocument(
+              doc); // Using the fromDocument method of the Post class
         }).toList();
       });
     } catch (e) {
       print('Error fetching posts: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load posts. Please try again later.')),
+        SnackBar(
+            content: Text('Failed to load posts. Please try again later.')),
       );
     }
   }
@@ -119,23 +124,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToHome() {
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => HomeScreen()));
   }
 
   void _navigateToDonations() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => DonationsScreen()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => DonationsScreen()));
   }
 
   void _navigateToSettings() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsScreen()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SettingsScreen()));
   }
 
   void _navigateToYourPosts() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => YourPostsScreen()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => YourPostsScreen()));
   }
 
   void _navigateToLogin() {
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 
   Widget _buildMainContent() {
@@ -170,68 +180,82 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
               ),
               padding: EdgeInsets.symmetric(vertical: 20),
-              child: Column(
-                children: [
-                  // Filter Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: ['All Posts', 'Most Recent', 'Recommended', 'Popular']
-                        .map((filter) => GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedFilter = filter;
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: selectedFilter == filter
-                              ? Color(0xFFD3D3FF).withOpacity(0.5)
-                              : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          filter,
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: selectedFilter == filter ? Color(0xFF8366A9) : Colors.black,
-                          ),
-                        ),
-                      ),
-                    ))
-                        .toList(),
-                  ),
-                  SizedBox(height: 20),
-                  // Search by Topic
-                  Text(
-                    'Search by Topic',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Filter Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children:
+                          ['All Posts', 'Most Recent', 'Recommended', 'Popular']
+                              .map((filter) => GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedFilter = filter;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: selectedFilter == filter
+                                            ? Color(0xFFD3D3FF).withOpacity(0.5)
+                                            : Colors.grey[300],
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        filter,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 14,
+                                          color: selectedFilter == filter
+                                              ? Color(0xFF8366A9)
+                                              : Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
                     ),
-                  ),
-                  SizedBox(height: 10),
-                  // Topic Buttons
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: ['Cancer Type', 'Cancer Stage', 'Mental Wellbeing', 'Treatment']
-                        .map((topic) => _buildTopicButton(Icons.local_hospital, topic))
-                        .toList(),
-                  ),
-                  SizedBox(height: 20),
-                  // Posts List
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: posts.length,
-                    itemBuilder: (context, index) {
-                      return _buildPostCard(posts[index]); // Use the Post object directly
-                    },
-                    separatorBuilder: (context, index) => SizedBox(height: 10), // Add space between posts
-                  ),
-                  SizedBox(height: 20),
-                ],
+                    SizedBox(height: 20),
+                    // Search by Topic
+                    Text(
+                      'Search by Topic',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    // Topic Buttons
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        'Cancer Type',
+                        'Cancer Stage',
+                        'Mental Wellbeing',
+                        'Treatment'
+                      ]
+                          .map((topic) =>
+                              _buildTopicButton(Icons.local_hospital, topic))
+                          .toList(),
+                    ),
+                    SizedBox(height: 20),
+                    // Posts List
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        return _buildPostCard(
+                            posts[index]); // Use the Post object directly
+                      },
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 10), // Add space between posts
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
             // Input Box for New Post
@@ -249,7 +273,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         // This will handle the new post data
                         setState(() {
                           // Update the posts list here with the new post
-                          posts.insert(0, Post.fromMap(newPost)); // Assuming you have a method fromMap to create a Post from a Map
+                          posts.insert(
+                              0,
+                              Post.fromMap(
+                                  newPost)); // Assuming you have a method fromMap to create a Post from a Map
                         });
                       },
                     ),
@@ -257,13 +284,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
 
                 // Show a Snackbar or Toast to inform the user if a post was created
-                if (newPostData != null && newPostData is Map<String, dynamic>) {
+                if (newPostData != null &&
+                    newPostData is Map<String, dynamic>) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Post created successfully!')),
                   );
                 }
               },
-              child: AbsorbPointer( // Prevent text input, only allow tap
+              child: AbsorbPointer(
+                // Prevent text input, only allow tap
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: "What's on your mind?",
