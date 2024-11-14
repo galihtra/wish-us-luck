@@ -183,12 +183,21 @@ class _HomeScreenState extends State<HomeScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // Filter Buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children:
-                          ['All Posts', 'Most Recent', 'Recommended', 'Popular']
-                              .map((filter) => GestureDetector(
+                    // Filter Buttons (Horizontal Scrolling)
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          'All Posts',
+                          'Most Recent',
+                          'Recommended',
+                          'Popular'
+                        ]
+                            .map((filter) => Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 6,
+                                      right: 6), // Adds space between items
+                                  child: GestureDetector(
                                     onTap: () {
                                       setState(() {
                                         selectedFilter = filter;
@@ -213,9 +222,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ),
                                     ),
-                                  ))
-                              .toList(),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
                     ),
+
                     SizedBox(height: 20),
                     // Search by Topic
                     Text(
