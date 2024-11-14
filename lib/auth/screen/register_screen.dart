@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:wish_us_luck/auth/screen/verification_sent_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -56,13 +57,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      final existingUser = (await FirebaseAuth.instance.fetchSignInMethodsForEmail(email)).isNotEmpty;
+      final existingUser =
+          (await FirebaseAuth.instance.fetchSignInMethodsForEmail(email))
+              .isNotEmpty;
       if (existingUser) {
         _showError('Email already in use.');
         return;
       }
 
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      String uid = userCredential.user!.uid;
+
+      await FirebaseFirestore.instance.collection('users').add({
+        'uid': uid,
+        'email': email,
+        'name': fullName,
+        'facebook': null,
+        'image': null,
+        'instagram': null,
+        'twitter': null,
+        'youtube': null,
+      });
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('fullName', fullName);
@@ -81,7 +97,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Dismiss any active SnackBar
+    ScaffoldMessenger.of(context)
+        .hideCurrentSnackBar(); // Dismiss any active SnackBar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
@@ -181,10 +198,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 'North America',
                 'Oceania',
                 'South America'
-              ].map((continent) => DropdownMenuItem(
-                child: Text(continent, style: TextStyle(fontFamily: 'Poppins')),
-                value: continent,
-              )).toList(),
+              ]
+                  .map((continent) => DropdownMenuItem(
+                        child: Text(continent,
+                            style: TextStyle(fontFamily: 'Poppins')),
+                        value: continent,
+                      ))
+                  .toList(),
               onChanged: (value) {
                 setState(() {
                   _selectedContinent = value;
@@ -192,7 +212,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               },
               decoration: InputDecoration(
                 labelText: 'Continent',
-                labelStyle: TextStyle(fontFamily: 'Poppins', color: Colors.black),
+                labelStyle:
+                    TextStyle(fontFamily: 'Poppins', color: Colors.black),
                 filled: true,
                 fillColor: Color(0xFFF0F0F0),
                 border: OutlineInputBorder(
@@ -300,13 +321,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: _isLoading
                   ? CircularProgressIndicator(color: Colors.white)
                   : const Text(
-                "I'm Ready",
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-              ),
+                      "I'm Ready",
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ],
         ),
