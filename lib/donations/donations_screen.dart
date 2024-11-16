@@ -272,13 +272,13 @@ class CampaignCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String amountRaised = data['Amount Raised']?.toString() ?? 'Rp0';
-    String imageUrl = data['Image URL'] ?? 'https://via.placeholder.com/280';
+    String amountRaised = data['amountRaised']?.toString() ?? 'Rp0';
+    String imageUrl = data['imageURL'] ?? 'https://via.placeholder.com/280';
     "https://images.unsplash.com/photo-1496449903678-68ddcb189a24?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
-    String posterName = data['Poster Name'] ?? 'Unknown';
-    String remainingDays = data['Remaining Days']?.toString() ?? 'N/A';
-    String title = data['Title'] ?? 'No Title';
-    String percentageFilled = data['Percentage Filled']?.toString() ?? '0%';
+    String posterName = data['posterName'] ?? 'Unknown';
+    String remainingDays = data['remainingDays']?.toString() ?? 'N/A';
+    String title = data['title'] ?? 'No Title';
+    String percentageFilled = data['percentageFilled']?.toString() ?? '0%';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -351,7 +351,7 @@ class CampaignCard extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    "Remaining Days: $remainingDays",
+                    "remainingDays: $remainingDays",
                     style: TextStyle(color: Colors.grey),
                   ),
                   SizedBox(height: 4),
