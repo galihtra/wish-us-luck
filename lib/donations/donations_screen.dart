@@ -161,35 +161,37 @@ class _DonationsContentState extends State<DonationsContent> {
           SizedBox(height: 8),
 
           // StreamBuilder for category-specific campaigns
-          StreamBuilder<QuerySnapshot>(
-            stream: widget.donations
-                .where('category', isEqualTo: selectedCategory ?? 'Emergency')
-                .orderBy('remainingDays') // Sort by remainingDays
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
+          // StreamBuilder<QuerySnapshot>(
+          //   // stream: widget.donations
+          //   //     .where('category', isEqualTo: selectedCategory ?? 'Emergency')
+          //   //     .orderBy('remainingDays') // Sort by remainingDays
+          //   //     .snapshots(),
+          //   // builder: (context, snapshot) {
+          //   //   if (snapshot.connectionState == ConnectionState.waiting) {
+          //   //     return Center(child: CircularProgressIndicator());
+          //   //   }
+          //   //   if (snapshot.hasError) {
+          //   //     return Center(child: Text('Error: ${snapshot.error}'));
+          //   //   }
 
-              final docs = snapshot.data?.docs ?? [];
-              if (docs.isEmpty) {
-                return Center(child: Text("No campaigns available."));
-              }
-              return SizedBox(
-                height: 180,
-                child: PageView.builder(
-                  itemCount: docs.length,
-                  itemBuilder: (context, index) {
-                    final data = docs[index].data() as Map<String, dynamic>;
-                    return CampaignCard(data: data);
-                  },
-                ),
-              );
-            },
-          ),
+          //   //   final docs = snapshot.data?.docs ?? [];
+          //   //   if (docs.isEmpty) {
+          //   //     return Center(child: Text("No campaigns available."));
+          //   //   }
+          //     // return SizedBox(
+          //     //   height: 180,
+          //     //   child: PageView.builder(
+          //     //     itemCount: docs.length,
+          //     //     itemBuilder: (context, index) {
+          //     //       final data = docs[index].data() as Map<String, dynamic>;
+          //     //       return CampaignCard(data: data);
+          //     //     },
+          //     //   ),
+          //     // );
+              
+          //   },
+          // ),
+          Center(child: Text("No campaigns available.")),
           SizedBox(height: 16),
 
           // All Campaigns Section
